@@ -1397,19 +1397,19 @@ class OvercookedGridworld(object):
                     "Illegal action %s in state %s" % (action, state)
                 )
 
-        new_state = state.deepcopy()
+        new_state = state.deepcopy() # we will use this state to capture the updated environment as agents take actions
         # Resolve interacts first
         (
             sparse_reward_by_agent,
             shaped_reward_by_agent,
-        ) = self.resolve_interacts(new_state, joint_action, events_infos)
-        assert new_state.player_positions == state.player_positions
+        ) = self.resolve_interacts(new_state, joint_action, events_infos) # new_state has updated 'interact' information
+        assert new_state.player_positions == state.player_positions # when agents 'interact' their positions and orientations do not change
         assert new_state.player_orientations == state.player_orientations
 
         # Resolve player movements
         self.resolve_movement(new_state, joint_action)
 
-        # Finally, environment effects
+        # Finally, environment effects # start cooking automatically if 3 ingre in pot & old dynamics
         self.step_environment_effects(new_state)
 
         # Additional dense reward logic
@@ -1661,7 +1661,7 @@ class OvercookedGridworld(object):
         new_positions, new_orientations = list(
             zip(
                 *[
-                    self._move_if_direction(p.position, p.orientation, a)
+                    self._move_if_direction(p.position, p.orientation, a) # considers only collisions with the environment i.e., only moving to empty space is allowed
                     for p, a in zip(old_player_states, joint_action)
                 ]
             )
@@ -2541,7 +2541,7 @@ class OvercookedGridworld(object):
                 print(len(state_mask_dict))
                 for k, v in state_mask_dict.items():
                     print(k)
-                    print(np.transpose(v, (1, 0)))
+                    print(np.transpose(v, (1, 0))) # note we are transposing here probably x and y are exchanged in orig
 
             # Stack of all the state masks, order decided by order of LAYERS
             state_mask_stack = np.array(
@@ -2592,14 +2592,14 @@ class OvercookedGridworld(object):
 
             The encoding for player i is as follows:
 
-                [player_i_features, other_player_features player_i_dist_to_other_players, player_i_position]
+                [player_i_features, other_player_features, player_i_dist_to_other_players, player_i_position]
 
-                player_{i}_features (length num_pots*10 + 24):
+                player_{i}_features (length num_pots*10 + 26):
                     pi_orientation: length 4 one-hot-encoding of direction currently facing
                     pi_obj: length 4 one-hot-encoding of object currently being held (all 0s if no object held)
                     pi_wall_{j}: {0, 1} boolean value of whether player i has wall immediately in direction j
                     pi_closest_{onion|tomato|dish|soup|serving|empty_counter}: (dx, dy) where dx = x dist to item, dy = y dist to item. (0, 0) if item is currently held
-                    pi_cloest_soup_n_{onions|tomatoes}: int value for number of this ingredient in closest soup
+                    pi_closest_soup_n_{onions|tomatoes}: int value for number of this ingredient in closest soup
                     pi_closest_pot_{j}_exists: {0, 1} depending on whether jth closest pot found. If 0, then all other pot features are 0. Note: can
                         be 0 even if there are more than j pots on layout, if the pot is not reachable by player i
                     pi_closest_pot_{j}_{is_empty|is_full|is_cooking|is_ready}: {0, 1} depending on boolean value for jth closest pot
@@ -2607,7 +2607,7 @@ class OvercookedGridworld(object):
                     pi_closest_pot_{j}_cook_time: int value for seconds remaining on soup. -1 if no soup is cooking
                     pi_closest_pot_{j}: (dx, dy) to jth closest pot from player i location
 
-                other_player_features (length (num_players - 1)*(num_pots*10 + 24)):
+                other_player_features (length (num_players - 1)*(num_pots*10 + 26)):
                     ordered concatenation of player_{j}_features for j != i
 
                 player_i_dist_to_other_players (length (num_players - 1)*2):

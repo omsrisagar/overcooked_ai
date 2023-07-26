@@ -67,6 +67,8 @@ from human_aware_rl.utils import WANDB_PROJECT
 #                                                               #
 #################################################################
 
+import pydevd_pycharm
+pydevd_pycharm.settrace('localhost', port=2345, stdoutToServer=True, stderrToServer=True)
 
 # Dummy wrapper to pass rllib type checks
 def _env_creator(env_config):
@@ -378,7 +380,7 @@ def run(params):
         # quiet = True so wandb doesn't log to console
         wandb.finish(quiet=True)
 
-    return result
+    return result # this is the result after 420 training iterations
 
 
 @ex.automain

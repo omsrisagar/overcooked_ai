@@ -257,8 +257,8 @@ class OvercookedEnv(object):
             self.state, joint_action, display_phi, self.mp
         )
 
-        # Update game_stats
-        self._update_game_stats(mdp_infos)
+        # Update game_stats # calculate cumulative sparse/dense rewards (by adding rewards at every timestep)
+        self._update_game_stats(mdp_infos) # stored in self.game_stats (not returned by the method)
 
         # Update state and done
         self.state = next_state
@@ -266,10 +266,10 @@ class OvercookedEnv(object):
         env_info = self._prepare_info_dict(joint_agent_action_info, mdp_infos)
 
         if done:
-            self._add_episode_info(env_info)
+            self._add_episode_info(env_info) # shouldn't we assign back env_info? No. Python dicts are passed by ref.
 
-        timestep_sparse_reward = sum(mdp_infos["sparse_reward_by_agent"])
-        return (next_state, timestep_sparse_reward, done, env_info)
+        timestep_sparse_reward = sum(mdp_infos["sparse_reward_by_agent"]) # total sparse rew. of both agents at current timestep
+        return (next_state, timestep_sparse_reward, done, env_info) # env_info has sparese/dense reward for each agent at current timestep
 
     def lossless_state_encoding_mdp(self, state):
         """
@@ -362,7 +362,7 @@ class OvercookedEnv(object):
         env_info["episode"] = {
             "ep_game_stats": self.game_stats,
             "ep_sparse_r": sum(
-                self.game_stats["cumulative_sparse_rewards_by_agent"]
+                self.game_stats["cumulative_sparse_rewards_by_agent"] # sparse rew. added for all prev. timesteps
             ),
             "ep_shaped_r": sum(
                 self.game_stats["cumulative_shaped_rewards_by_agent"]

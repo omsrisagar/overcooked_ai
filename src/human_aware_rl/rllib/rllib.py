@@ -95,7 +95,7 @@ class RlLibAgent(Agent):
 
         # Use Rllib.Policy class to compute action argmax and action probabilities
         # The first value is action_idx, which we will recompute below so the results are stochastic
-        _, rnn_state, info = self.policy.compute_actions(
+        _, rnn_state, info = self.policy.compute_actions( # info has action logits, best action prob, log of prev. value, value prediction
             np.array([my_obs]), self.rnn_state
         )
 
@@ -265,12 +265,12 @@ class OvercookedMultiAgent(MultiAgentEnv):
         raise ValueError("Unsupported agent type {0}".format(agent_id))
 
     def _get_obs(self, state):
-        ob_p0 = self._get_featurize_fn(self.curr_agents[0])(state)[0]
+        ob_p0 = self._get_featurize_fn(self.curr_agents[0])(state)[0] # considering below line, seems like we are calculating obss twice for each agent. Maybe this is need if agents are different e.g., ppo and bc; maybe we can have an if condition then.
         ob_p1 = self._get_featurize_fn(self.curr_agents[1])(state)[1]
         return ob_p0.astype(np.float32), ob_p1.astype(np.float32)
 
     def _populate_agents(self):
-        # Always include at least one ppo agent (i.e. bc_sp not supported for simplicity)
+        # Always include at least one ppo agent (i.e. bc_sp not supported for simplicity) #sp = self play
         agents = ["ppo"]
 
         # Coin flip to determine whether other agent should be ppo or bc
@@ -336,7 +336,7 @@ class OvercookedMultiAgent(MultiAgentEnv):
         ob_p0, ob_p1 = self._get_obs(next_state)
 
         shaped_reward_p0 = (
-            sparse_reward + self.reward_shaping_factor * dense_reward[0]
+            sparse_reward + self.reward_shaping_factor * dense_reward[0] # sparse + scaled shaped reward.
         )
         shaped_reward_p1 = (
             sparse_reward + self.reward_shaping_factor * dense_reward[1]
