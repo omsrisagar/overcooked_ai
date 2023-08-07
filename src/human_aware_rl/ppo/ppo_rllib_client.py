@@ -169,7 +169,7 @@ def my_config():
     # execute per train batch).
     num_sgd_iter = 8 if not LOCAL_TESTING else 1
 
-    # How many trainind iterations (calls to trainer.train()) to run before saving model checkpoint
+    # How many training iterations (calls to trainer.train()) to run before saving model checkpoint
     save_freq = 25
 
     # How many training iterations to run between each evaluation
@@ -201,7 +201,7 @@ def my_config():
     bc_model_dir = os.path.join(BC_SAVE_DIR, "default")
 
     # Whether bc agents should return action logit argmax or sample
-    bc_stochastic = True
+    bc_stochastic = True # I think sampling will be stochastic while argmax will be deterministic
 
     ### Environment Params ###
     # Which overcooked level to use
@@ -246,7 +246,7 @@ def my_config():
     # schedule for bc_factor is represented by a list of points (t_i, v_i) where v_i represents the
     # value of bc_factor at timestep t_i. Values are linearly interpolated between points
     # The default listed below represents bc_factor=0 for all timesteps
-    bc_schedule = OvercookedMultiAgent.self_play_bc_schedule
+    bc_schedule = OvercookedMultiAgent.self_play_bc_schedule # probably this is prob. that ppo agent gets paired with bc agent.
 
     # To be passed into rl-lib model/custom_options config
     model_params = {
